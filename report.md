@@ -17,7 +17,9 @@
 
  n 为句子长度，k 为嵌入维数，m 为类数。
 
-CNN 示意图：下图中纵向窗户长度分别取 2，3，4，然后并联，提取相邻词语的语义。
+CNN 示意图：
+
+下图中纵向窗户长度分别取 2，3，4，然后并联，提取相邻词语的语义。
 
 ![image-20200528202634741](/Users/yuanwei/repos/Chinese-Text-Classification-Pytorch/report.assets/image-20200528202634741.png)
 
@@ -85,6 +87,14 @@ class Config(BaseConfig):
 
 #### 网络结构与参数
 
+BiLSTM 示意图：
+
+由图可知 BiLSTM 可以正向、反向提取一句话的语义。
+
+在 pytorch 中输出的就是正向、反向的隐层。
+
+![../_images/birnn.svg](https://d2l.ai/_images/birnn.svg)
+
 完整结构：
 
 n 为句子长度，k 为嵌入维数，h 为 LSTM 长度（隐层长度），m 为类数。
@@ -92,8 +102,9 @@ n 为句子长度，k 为嵌入维数，h 为 LSTM 长度（隐层长度），m 
 ```mermaid
 graph TD
 A[sequence of words: 1 x n]-->B[embedding: 1 x n x k]
-B-->C["BiLSTM: 1 x n x (2h + k)"]
+B-->C["BiLSTM: 1 x n x 2h"]
 C-->D["convolution: kernel size = (2 or 3 or 4, 2h+k)"]
+B-->D
 D-->E[pooling: extract one feature from each CNN unit]
 E-->F[dropout: rate = 0.5]
 F-->G[linear layer: 1 x m]
@@ -148,11 +159,17 @@ class Config(BaseConfig):
 
 #### 优缺点
 
-+ 优点：效果好；网络结构容易解释，单层双向
++ 优点：效果好；相当于利用了 BiLSTM 和 embedding 两种方式产生 features 再输入 CNN，兼具了 CNN 和 RNN 的表达能力。
 
-+ 缺点：由于纵向窗户长度取值仅为 (2, 3, 4)，模型无法捕捉到距离较长的词之间的语义联系，导致无法提取这类语义信息。
++ 缺点：训练较慢，计算代价较大。
 
 ### BiLSTM + CNN + Attention
+
+参考文献: Attention-Based Convolutional Neural Network for Modeling Sentence Pairs
+
+#### 网络结构与参数
+
+
 
 基于字，最后总精确度为 
 
