@@ -24,7 +24,7 @@ class Model(nn.Module):
     def __init__(self, config):
         super().__init__()
         self.embedding = nn.Embedding(
-            config.n_vocab, config.embed, padding_idx=config.n_vocab - 1
+            config.num_vocab, config.embed, padding_idx=config.num_vocab - 1
         )
         self.lstm = nn.LSTM(
             config.embed,

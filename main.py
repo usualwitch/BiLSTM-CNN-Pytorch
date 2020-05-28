@@ -20,12 +20,15 @@ if __name__ == '__main__':
     if args.word:
         vocab_path = 'vocab-word.pkl'
         data_dir = 'data'
+        pad_size = 50
     else:
         vocab_path = 'vocab-char.pkl'
         data_dir = 'Data'
+        pad_size = 100
     class_list = sorted(label for label in os.listdir(os.path.join(data_dir, 'TrainData')) if not label.startswith('.'))
 
     config = x.Config(data_dir, class_list, vocab_path)
+    config.pad_size = pad_size
     np.random.seed(1)
     torch.manual_seed(1)
     torch.cuda.manual_seed_all(1)
@@ -47,6 +50,10 @@ if __name__ == '__main__':
     train(config, model, train_iter, dev_iter)
 
     predictions = predict(config, model, test_iter)
-    with open(model_name + ('_word_' if args.word else '_char_') + 'result.txt', 'w', encoding='UTF-8') as f:
+
+    if not os.path.exists('result'):
+        os.mkdir('result')
+
+    with open(os.path.join('result', model_name + ('_word_' if args.word else '_char_') + 'result.txt'), 'w', encoding='UTF-8') as f:
         for i, label in enumerate(predictions):
             print(f'{i}.txt {label}', file=f)
