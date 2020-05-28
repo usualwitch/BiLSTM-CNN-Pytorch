@@ -47,6 +47,6 @@ if __name__ == '__main__':
     train(config, model, train_iter, dev_iter)
 
     predictions = predict(config, model, test_iter)
-    with open(model_name + 'result.txt', 'w', encoding='UTF-8') as f:
+    with open(model_name + ('_word_' if args.word else '_char_') + 'result.txt', 'w', encoding='UTF-8') as f:
         for i, label in enumerate(predictions):
-            print(f'{i}.txt {label}')
+            print(f'{i}.txt {label}', file=f)

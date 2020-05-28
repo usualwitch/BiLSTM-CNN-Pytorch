@@ -32,12 +32,13 @@ def train(config, model, train_iter, dev_iter, test_iter=None):
     optimizer = torch.optim.Adam(model.parameters(), lr=config.learning_rate)
 
     # scheduler = torch.optim.lr_scheduler.ExponentialLR(optimizer, gamma=0.9)
+    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=5)
     total_batch = 0
     dev_best_loss = float("inf")
     last_improve = 0
     flag = False
     writer = SummaryWriter(
-        log_dir=os.path.join(config.log_path, time.strftime("%m-%d_%H.%M", time.localtime()))
+        log_dir=os.path.join(config.log_path, time.strftime('%H_%M_%S'))
     )
     for epoch in range(config.num_epoches):
         print("Epoch [{}/{}]".format(epoch + 1, config.num_epoches))

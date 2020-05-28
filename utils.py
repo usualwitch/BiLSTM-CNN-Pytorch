@@ -159,3 +159,5 @@ if __name__ == "__main__":
     if not os.path.exists("saved_dict"):
         os.mkdir("saved_dict")
     get_vocab("Data", word_level=False)
+    # Copy Data folder to data.
+    get_vocab('data', word_level=True)
