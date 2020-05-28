@@ -10,6 +10,9 @@ import jieba
 MAX_VOCAB_SIZE = 10000  # 词表长度限制
 UNK, PAD = "<UNK>", "<PAD>"  # 未知字，padding符号
 
+with open('baidu_stopwords.txt', 'r', encoding='UTF-8') as f:
+    STOP_WORDS = set(f.read().splitlines())
+
 
 def seg_text(data_dir):
     """
@@ -19,7 +22,7 @@ def seg_text(data_dir):
         with open(file_path, "r") as f:
             text = f.readline()
         with open(file_path, "w") as f:
-            f.write(" ".join(jieba.cut(text)))
+            f.write(" ".join(word for word in jieba.cut(text) if word not in STOP_WORDS))
 
 
 def build_vocab(data_dir, tokenizer, max_size, min_freq):
@@ -59,7 +62,7 @@ def build_dataset(config, word_level=True):
 
     label_to_id = {label: idx for idx, label in enumerate(config.class_list)}
 
-    def load_dataset(data_dir, pad_size=32):
+    def load_dataset(data_dir, pad_size=32, test=True):
         contents = []
         for label in os.listdir(data_dir):
             label_dir = os.path.join(data_dir, label)
@@ -72,6 +75,8 @@ def build_dataset(config, word_level=True):
                     if pad_size:
                         if len(token) < pad_size:
                             token.extend([PAD] * (pad_size - len(token)))
+                            if all(e not in vocab for e in token):
+                                label_id = -2
                         else:
                             token = token[:pad_size]
                             seq_len = pad_size
@@ -85,13 +90,13 @@ def build_dataset(config, word_level=True):
     return vocab, train, dev, test
 
 
-class DatasetIterater(object):
+class DatasetIterater:
     def __init__(self, batches, batch_size, device):
         self.batch_size = batch_size
         self.batches = batches
-        self.n_batches = len(batches) // batch_size
+        self.num_batches = len(batches) // batch_size
         self.residue = False
-        if len(batches) % self.n_batches != 0:
+        if len(batches) % self.num_batches != 0:
             self.residue = True
         self.index = 0
         self.device = device
@@ -104,13 +109,13 @@ class DatasetIterater(object):
         return (x, seq_len), y
 
     def __next__(self):
-        if self.residue and self.index == self.n_batches:
+        if self.residue and self.index == self.num_batches:
             batches = self.batches[self.index * self.batch_size: len(self.batches)]
             self.index += 1
             batches = self._to_tensor(batches)
             return batches
 
-        elif self.index >= self.n_batches:
+        elif self.index >= self.num_batches:
             self.index = 0
             raise StopIteration
         else:
@@ -126,9 +131,9 @@ class DatasetIterater(object):
 
     def __len__(self):
         if self.residue:
-            return self.n_batches + 1
+            return self.num_batches + 1
         else:
-            return self.n_batches
+            return self.num_batches
 
 
 def build_iterator(dataset, config):
