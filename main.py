@@ -5,7 +5,7 @@ import numpy as np
 from importlib import import_module
 import argparse
 
-from train_eval import train, init_network
+from train_eval import train, init_network, predict
 from utils import build_dataset, build_iterator, get_time_diff
 
 parser = argparse.ArgumentParser(description='Chinese Text Classification')
@@ -45,3 +45,8 @@ if __name__ == '__main__':
     init_network(model)
     print(model.parameters)
     train(config, model, train_iter, dev_iter)
+
+    predictions = predict(config, model, test_iter)
+    with open(model_name + 'result.txt', 'w', encoding='UTF-8') as f:
+        for i, label in enumerate(predictions):
+            print(f'{i}.txt {label}')

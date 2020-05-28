@@ -89,7 +89,6 @@ def train(config, model, train_iter, dev_iter, test_iter=None):
 
 
 def test(config, model, test_iter):
-    # test
     model.load_state_dict(torch.load(config.save_path))
     model.eval()
     start_time = time.time()
@@ -129,3 +128,16 @@ def evaluate(config, model, data_iter, test=False):
         confusion = metrics.confusion_matrix(labels_all, predict_all)
         return acc, loss_total / len(data_iter), report, confusion
     return acc, loss_total / len(data_iter)
+
+
+def predict(config, model, data_iter):
+    model.load_state_dict(torch.load(config.save_path, map_location='cpu' if not torch.cuda.is_available() else None))
+    model.eval()
+    predictions = []
+    id_to_label = dict(enumerate(config.class_list))
+    with torch.no_grad():
+        for texts, _ in data_iter:
+            outputs = model(texts)
+            label_ids = torch.max(outputs.data, 1)[1].cpu().numpy()
+            predictions.extend([id_to_label.get(idx, 'unknown') for idx in label_ids])
+    return predictions

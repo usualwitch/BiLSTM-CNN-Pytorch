@@ -14,6 +14,7 @@ class BaseConfig:
         self.vocab_path = vocab_path
         self.num_vocab = 0  # set when training
 
+        self.require_improvement = 1000
         self.save_path = os.path.join('saved_dict', self.model_name + '.ckpt')
         self.log_path = os.path.join('log', self.model_name)
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
