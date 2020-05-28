@@ -1,11 +1,13 @@
+import os
+import time
 import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from sklearn import metrics
-import time
-from utils import get_time_diff
 from torch.utils.tensorboard import SummaryWriter
+from sklearn import metrics
+
+from utils import get_time_diff
 
 
 def init_network(model, method="xavier", exclude="embedding", seed=123):
@@ -35,7 +37,7 @@ def train(config, model, train_iter, dev_iter, test_iter=None):
     last_improve = 0
     flag = False
     writer = SummaryWriter(
-        log_dir=config.log_path + "/" + time.strftime("%m-%d_%H.%M", time.localtime())
+        log_dir=os.path.join(config.log_path, time.strftime("%m-%d_%H.%M", time.localtime()))
     )
     for epoch in range(config.num_epoches):
         print("Epoch [{}/{}]".format(epoch + 1, config.num_epoches))
@@ -86,6 +88,8 @@ def train(config, model, train_iter, dev_iter, test_iter=None):
     writer.close()
     if test_iter:
         test(config, model, test_iter)
+    else:
+        test(config, model, dev_iter)
 
 
 def test(config, model, test_iter):
